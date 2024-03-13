@@ -3,7 +3,9 @@ name: Sync with template repository
 on:
   push:
     branches:
-      - '*'
+      - main
+      - master
+      - develop
   # cronjob trigger
   schedule:
   - cron:  "0 0 1 * *"
