@@ -1,0 +1,13 @@
+name: Check if repo is a template
+
+on: [push]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if repo is a template
+        run: |
+          response=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
+          is_template=$(echo $response | jq .is_template)
+          echo "Is template: $is_template"
