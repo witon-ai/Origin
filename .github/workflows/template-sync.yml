@@ -3,7 +3,7 @@ name: Get template repository
 on:
   push:
     branches:
-      - main
+      - '*'
   # cronjob trigger
   schedule:
   - cron:  "0 0 1 * *"
