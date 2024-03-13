@@ -2,13 +2,13 @@ name: Get template repository
 
 on:
   push:
-    branches:
-      - '*'
-  # cronjob trigger
-  schedule:
-  - cron:  "0 0 1 * *"
-  # manual trigger
-  workflow_dispatch:
+  #   branches:
+  #     - '*'
+  # # cronjob trigger
+  # schedule:
+  # - cron:  "0 0 1 * *"
+  # # manual trigger
+  # workflow_dispatch:
 
 jobs:
   repo-sync:
