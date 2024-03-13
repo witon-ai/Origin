@@ -39,6 +39,6 @@ jobs:
         if: env.template_repository != ''
         uses: AndreasAugustin/actions-template-sync@v1
         with:
-          source_repo_path: env.template_repository
+          source_repo_path: ${{ env.template_repository }}
           # upstream_branch: <target_branch> # defaults to main
           # pr_labels: <label1>,<label2>[,...] # defaults to template_sync
