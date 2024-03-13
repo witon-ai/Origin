@@ -22,6 +22,7 @@ jobs:
 
     steps:
       - name: Get template repository
+        if: secrets.WORKFLOW_SYNC_PAT != ''
         run: |
           response=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
           template_repository=$(echo $response | jq -r '.template_repository.full_name // empty')
@@ -33,14 +34,16 @@ jobs:
         if: env.template_repository != ''
         uses: actions/checkout@v4
         # https://github.com/actions/checkout#usage
-        # uncomment if you use submodules within the source repository
-        # with:
-        #   submodules: true
+        with:
+          # uncomment if you use submodules within the source repository
+          # submodules: true
+          token: ${{ secrets.WORKFLOW_SYNC_PAT }}
 
       - name: actions-template-sync
         if: env.template_repository != ''
         uses: AndreasAugustin/actions-template-sync@v1
         with:
+          github_token: ${{ secrets.WORKFLOW_SYNC_PAT }}
           source_repo_path: ${{ env.template_repository }}
           # upstream_branch: <target_branch> # defaults to main
           # pr_labels: <label1>,<label2>[,...] # defaults to template_sync
