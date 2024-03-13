@@ -9,5 +9,5 @@ jobs:
       - name: Get template repository
         run: |
           response=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
-          template_repository=$(echo $response | jq .template_repository)
+          template_repository=$(echo $response | jq -r '.template_repository.full_name // empty')
           echo "Template repository: $template_repository"
