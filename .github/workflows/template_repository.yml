@@ -1,0 +1,13 @@
+name: Get template repository
+
+on: [push]
+
+jobs:
+  get-template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get template repository
+        run: |
+          response=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
+          template_repository=$(echo $response | jq .template_repository)
+          echo "Template repository: $template_repository"
