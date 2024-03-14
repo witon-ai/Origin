@@ -22,7 +22,9 @@ jobs:
 
     steps:
       - name: Get template repository
-        if: secrets.WORKFLOW_SYNC_PAT != ''
+        env: 
+          workflow_sync_pat: ${{ secrets.WORKFLOW_SYNC_PAT }}
+        if: env.workflow_sync_pat != ''
         run: |
           response=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
           template_repository=$(echo $response | jq -r '.template_repository.full_name // empty')
@@ -31,7 +33,7 @@ jobs:
 
       # To use this repository's private action, you must check out the repository
       - name: Checkout
-        if: env.template_repository != ''
+        if: env.workflow_sync_pat != '' && env.template_repository != ''
         uses: actions/checkout@v4
         # https://github.com/actions/checkout#usage
         with:
@@ -40,7 +42,7 @@ jobs:
           token: ${{ secrets.WORKFLOW_SYNC_PAT }}
 
       - name: actions-template-sync
-        if: env.template_repository != ''
+        if: env.workflow_sync_pat != '' && env.template_repository != ''
         uses: AndreasAugustin/actions-template-sync@v1
         with:
           github_token: ${{ secrets.WORKFLOW_SYNC_PAT }}
