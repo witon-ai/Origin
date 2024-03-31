@@ -40,9 +40,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.WORKFLOW_SYNC_PAT }}
+          fetch-depth: 0
 
       - name: actions-template-sync
         uses: AndreasAugustin/actions-template-sync@v1
         with:
           github_token: ${{ secrets.WORKFLOW_SYNC_PAT }}
           source_repo_path: ${{ needs.check.outputs.template-repository-exists }}
+
+      - name: Rename from template repository
+        uses: kota65535/github-template-rename-action@v1.2.0
