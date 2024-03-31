@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       wf-sync-pat-exists: ${{ steps.wf-sync-pat-check.outputs.defined }}
+      template-repository-exists: ${{ steps.template-repository-check.outputs.template_repository }}
     steps:
       - name: Check for WORKFLOW_SYNC_PAT Secret availability
         id: wf-sync-pat-check
@@ -18,32 +19,32 @@ jobs:
             echo "defined=false" >> $GITHUB_OUTPUT;
           fi
 
-  repo-sync:
-    runs-on: ubuntu-latest
-    needs: [check-wf-sync-pat-secret]
-    if: needs.check-wf-sync-pat-secret.outputs.wf-sync-pat-exists == 'true'
-    permissions:
-      contents: write
-      pull-requests: write
-
-    steps:
       - name: Get template repository
-        id: template-repository
+        id: template-repository-check
         run: |
           response=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
           template_repository=$(echo $response | jq -r '.template_repository.full_name // empty')
           echo "Template repository: $template_repository"
           echo "template_repository=$template_repository" >> $GITHUB_OUTPUT
 
+  repo-sync:
+    runs-on: ubuntu-latest
+    needs: [check-wf-sync-pat-secret]
+    if: needs.check-wf-sync-pat-secret.outputs.wf-sync-pat-exists == 'true' && needs.check-wf-sync-pat-secret.outputs.template-repository-exists
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
       - name: Checkout
-        if: ${{steps.template-repository.outputs.template_repository}}
+        if: ${{ needs.check-wf-sync-pat-secret.outputs.template-repository-exists }}
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.WORKFLOW_SYNC_PAT }}
 
       - name: actions-template-sync
-        if: ${{steps.template-repository.outputs.template_repository}}
+        if: ${{ needs.check-wf-sync-pat-secret.outputs.template-repository-exists }}
         uses: AndreasAugustin/actions-template-sync@v1
         with:
           github_token: ${{ secrets.WORKFLOW_SYNC_PAT }}
-          source_repo_path: ${{ steps.template-repository.outputs.template_repository }}
+          source_repo_path: ${{ needs.check-wf-sync-pat-secret.outputs.template-repository-exists }}
