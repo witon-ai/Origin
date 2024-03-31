@@ -3,14 +3,14 @@ name: Sync with template repository
 on: [push, workflow_dispatch]
 
 jobs:
-  check-wf-sync-pat-secret:
+  check-can-sync:
     runs-on: ubuntu-latest
     outputs:
-      wf-sync-pat-exists: ${{ steps.wf-sync-pat-check.outputs.defined }}
+      workflow-sync-pat-exists: ${{ steps.workflow-sync-pat-check.outputs.defined }}
       template-repository-exists: ${{ steps.template-repository-check.outputs.template_repository }}
     steps:
       - name: Check for WORKFLOW_SYNC_PAT Secret availability
-        id: wf-sync-pat-check
+        id: workflow-sync-pat-check
         shell: bash
         run: |
           if [ "${{ secrets.WORKFLOW_SYNC_PAT }}" != '' ]; then
@@ -29,22 +29,22 @@ jobs:
 
   repo-sync:
     runs-on: ubuntu-latest
-    needs: [check-wf-sync-pat-secret]
-    if: needs.check-wf-sync-pat-secret.outputs.wf-sync-pat-exists == 'true' && needs.check-wf-sync-pat-secret.outputs.template-repository-exists
+    needs: [check-can-sync]
+    if: needs.check-can-sync.outputs.workflow-sync-pat-exists == 'true' && needs.check-can-sync.outputs.template-repository-exists
     permissions:
       contents: write
       pull-requests: write
 
     steps:
       - name: Checkout
-        if: ${{ needs.check-wf-sync-pat-secret.outputs.template-repository-exists }}
+        if: ${{ needs.check-can-sync.outputs.template-repository-exists }}
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.WORKFLOW_SYNC_PAT }}
 
       - name: actions-template-sync
-        if: ${{ needs.check-wf-sync-pat-secret.outputs.template-repository-exists }}
+        if: ${{ needs.check-can-sync.outputs.template-repository-exists }}
         uses: AndreasAugustin/actions-template-sync@v1
         with:
           github_token: ${{ secrets.WORKFLOW_SYNC_PAT }}
-          source_repo_path: ${{ needs.check-wf-sync-pat-secret.outputs.template-repository-exists }}
+          source_repo_path: ${{ needs.check-can-sync.outputs.template-repository-exists }}
