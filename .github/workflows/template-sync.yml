@@ -33,16 +33,16 @@ jobs:
           response=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
           template_repository=$(echo $response | jq -r '.template_repository.full_name // empty')
           echo "Template repository: $template_repository"
-          echo "::set-output name=template_repository::$template_repository"
+          echo "template_repository=$template_repository" >> $GITHUB_OUTPUT
 
       - name: Checkout
-        if: ${{steps.template-repository.outputs.template_repository}} != ''
+        if: ${{steps.template-repository.outputs.template_repository}}
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.WORKFLOW_SYNC_PAT }}
 
       - name: actions-template-sync
-        if: ${{steps.template-repository.outputs.template_repository}} != ''
+        if: ${{steps.template-repository.outputs.template_repository}}
         uses: AndreasAugustin/actions-template-sync@v1
         with:
           github_token: ${{ secrets.WORKFLOW_SYNC_PAT }}
