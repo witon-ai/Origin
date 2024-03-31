@@ -36,4 +36,4 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: kota65535/github-template-rename-action@v1
+      - uses: kota65535/github-template-rename-action@v1.2.0
