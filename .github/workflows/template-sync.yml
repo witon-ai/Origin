@@ -1,16 +1,6 @@
 name: Sync with template repository
 
-on:
-  push:
-    branches:
-      - main
-      - master
-      - develop
-  # cronjob trigger
-  schedule:
-  - cron:  "0 0 1 * *"
-  # manual trigger
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   check-wf-sync-pat-secret:
@@ -38,27 +28,22 @@ jobs:
 
     steps:
       - name: Get template repository
+        id: template-repository
         run: |
           response=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
           template_repository=$(echo $response | jq -r '.template_repository.full_name // empty')
           echo "Template repository: $template_repository"
-          echo "template_repository=$template_repository" >> $GITHUB_ENV
+          echo "::set-output name=template_repository::$template_repository"
 
-      # To use this repository's private action, you must check out the repository
       - name: Checkout
-        if: env.template_repository != ''
+        if: ${{steps.template-repository.outputs.template_repository}} != ''
         uses: actions/checkout@v4
-        # https://github.com/actions/checkout#usage
         with:
-          # uncomment if you use submodules within the source repository
-          # submodules: true
           token: ${{ secrets.WORKFLOW_SYNC_PAT }}
 
       - name: actions-template-sync
-        if: env.template_repository != ''
+        if: ${{steps.template-repository.outputs.template_repository}} != ''
         uses: AndreasAugustin/actions-template-sync@v1
         with:
           github_token: ${{ secrets.WORKFLOW_SYNC_PAT }}
-          source_repo_path: ${{ env.template_repository }}
-          # upstream_branch: <target_branch> # defaults to main
-          # pr_labels: <label1>,<label2>[,...] # defaults to template_sync
+          source_repo_path: ${{ steps.template-repository.outputs.template_repository }}
